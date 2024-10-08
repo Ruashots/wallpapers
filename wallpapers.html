@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slideshow Wallpaper</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            overflow: hidden;
+        }
+
+        .slideshow {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slideshow img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .slideshow img.active {
+            opacity: 1;
+        }
+
+        #fullscreen-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="slideshow" id="slideshow">
+    <!-- Images will be added dynamically by JavaScript -->
+</div>
+
+<button id="fullscreen-button">Go Fullscreen</button>
+
+<script>
+    // Load images dynamically as wp1.jpg, wp2.jpg, ... until one fails
+    const slideshowContainer = document.getElementById('slideshow');
+    let index = 1;
+    let loadedImages = 0;
+
+    function loadNextImage() {
+        const img = document.createElement('img');
+        img.src = `wallpapers/wp${index}.png`;  // Assuming images are named wp1.jpg, wp2.jpg, ...
+        img.alt = `Wallpaper wp${index}`;
+
+        // If the image loads successfully, append it to the slideshow
+        img.onload = () => {
+            slideshowContainer.appendChild(img);
+            index++;
+            loadedImages++;
+            loadNextImage(); // Load the next image
+        };
+
+        // If the image fails to load, stop the process
+        img.onerror = () => {
+            if (loadedImages === 0) {
+                alert("No images found in the wallpapers directory.");
+            }
+        };
+    }
+
+    // Start loading images
+    loadNextImage();
+
+    // Fullscreen functionality
+    document.getElementById('fullscreen-button').addEventListener('click', function() {
+        const element = document.documentElement;
+
+        // Enter fullscreen mode
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) { // Firefox
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) { // Chrome, Safari, Opera
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) { // IE/Edge
+            element.msRequestFullscreen();
+        }
+
+        // Hide the button after entering fullscreen
+        document.getElementById('fullscreen-button').style.display = 'none';
+    });
+
+    // JavaScript for the slideshow
+    let currentIndex = 0;
+    function showNextImage() {
+        const images = document.querySelectorAll('#slideshow img');
+        const totalImages = images.length;
+
+        if (totalImages > 0) {
+            images[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % totalImages;
+            images[currentIndex].classList.add('active');
+        }
+    }
+
+    // Set the first image as active once all images are loaded
+    window.addEventListener('load', function () {
+        const images = document.querySelectorAll('#slideshow img');
+        if (images.length > 0) {
+            images[0].classList.add('active');
+        }
+
+        // Change the image every 60 seconds
+        setInterval(showNextImage, 60000);
+    });
+</script>
+
+</body>
+</html>
